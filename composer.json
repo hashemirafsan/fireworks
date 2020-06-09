@@ -1,0 +1,37 @@
+{
+    "name": "hashemi/fireworks",
+    "description": "A simple trait that will help to fire dirty column wise event on your laravel model.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "model-events",
+        "eloquent",
+        "laravel",
+        "column-wise-events"
+    ],
+    "authors": [
+        {
+            "name": "Hashemi Rafsan",
+            "email": "rafsanhashemi@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.1",
+        "illuminate/database": "^6.0|^7.0",
+        "illuminate/support": "^6.0|^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.4|^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hashemi\\Fireworks\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/Helpers"
+        ]
+    }
+}

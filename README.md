@@ -1,120 +1,94 @@
 # Laravel Fireworks
-A simple & dynamic package for your eloquent query in laravel. It will help 
-you to write query logic individual for each parameter.
+A simple trait that will help to fire model property wise event on your laravel model. Using laravel model events, to create hooks with changed column and data.
 
 ## Installation
 You can start it from composer. Go to your terminal and run this command from your project root directory.
 
 ```php
-composer require hashemi/queryfilter
+composer require hashemi/fireworks
 ```
-
-- If you're using Laravel, then Laravel will automatically discover the package. In case it doesn't discover the package then add the following provider in your `config/app.php`'s **providers** array.
-```php
-Hashemi\QueryFilter\QueryFilterServiceProvider::class
-```
-
-- If you're using Lumen, then you'll have to add the following snippet in your `bootstrap/app.php` file.
-```php
-$app->register(Hashemi\QueryFilter\QueryFilterServiceProvider::class)
-```
-
-## Usage
-Suppose you want use query-filters on `User` model for query. Laravel QueryFilter provide `Filterable` trait . You need to use it on your model. It will add a scope `filter` on your model. Like,
+## Setup
+At first, you need to use `Fireworks` trait on your model where you want register your model events.
 
 ```php
 class User extends Model
 {
-    // Use Filterable Trait
+    // Use Fireworks Trait
     // ....
-    use \Hashemi\QueryFilter\Filterable;
+    use \Hashemi\Fireworks\Fireworks;
     // ....
 }
 ```
+``Fireworks`` trait add ``boot`` method on your model and register pre-defined model event hooks that already provided by laravel. This package supports ``retrieved, creating, created, updating, updated, deleting, deleted, saving, saved`` hooks. So, you don't need to register again this hooks are on ``boot`` method.
 
-Now, you need to create your query filter file where you will write sql logic to generate sql by passing parameter. 
-You can create your filter file by using command,
-
+## How to use
+This package will help you figure out of every hooks in methods. Example: suppose you want to use ``creating`` hooks, just declare ``onModelCreating`` method on your model. 
 ```php
-php artisan make:filter UserFilter
-``` 
-
-This command will create `Filters` directory on your `app/` directory. So, you can find the file on `app/Filters/UserFilter.php`. Every method of filter class, represent your passing parameter key. You need to pass your parameter `snake` case and your method name will be like `apply<ParamterName>Property` format. Property name must be write in `Pascal` case.
-
-```php
-class UserFilter extends \Hashemi\QueryFilter\QueryFilter
+class User extends Model
 {
-    public function applyIdProperty($id)
-    {
-        return $this->builder->where('id', '=', $id);
+    // Use Fireworks Trait
+    // ....
+    use \Hashemi\Fireworks\Fireworks;
+    protected $fillable = [
+        'name',
+    ];
+    // ....
+    protected function onModelCreating($model) {
+        $model->name = "Kuddus";
     }
 
-    public function applyNameProperty($name)
-    {
-        return $this->builder->where('name', 'LIKE', "%$name%");
-    }
-}
-```
+    protected function onModelUpdating($model) {}
 
-After create that file, when you use your model on you controller to query something, you need to use your scope and pass `UserFilter` class as a parameter. You controller will be look like,
+    protected function onModelSaving($model) {}
+    
+    protected function onModelCreated($model) {}
 
-```php
-class UserController extends Controller
-{
-    public function index(Request $request, UserFilter $filter)
-    {
-        $user = User::query()->filter($filter)->get();
-        // do whatever
-    }
-}
-``` 
+    protected function onModelUpdated($model) {}
 
-If you want to pass your custom queries on filter, you can also do that in your filter, 
-
-```php
-class UserController extends Controller
-{
-    public function index(Request $request, UserFilter $filter)
-    {
-        $user = User::query()->filter($filter, [
-            'username' => 'ssi-anik'
-        ])->get();
-        // do whatever
-    }
-}
-
-```
-And on your `app\Filters\UserFilter.php` file, you can do something like it,
-
-```php
-class UserFilter extends \Hashemi\QueryFilter\QueryFilter
-{
-    public function applyIdProperty($id)
-    {
-        return $this->builder->where('id', '=', $id);
-    }
-
-    public function applyNameProperty($name)
-    {
-        return $this->builder->where('name', 'LIKE', "%$name%");
+    protected function onModelSaved($model) {
+        $model->name = "Ali";
+        $model->save();
     }
     
-    public function applyUsernameProperty($username)
+    protected function onModelNameSaved($model, $newValue, $oldValue)
     {
-        return $this->builder->where('username', 'LIKE', "%$username%");    
+        
     }
-
 }
 ```
+#### onModelCreating($model)
+You can use ``onModelCreating`` instead of ``static::creating``
 
-That's it.
+#### onModelUpdating($model)
+You can use ``onModelUpdating`` instead of ``static::updating``
+
+#### onModelSaving($model)
+You can use ``onModelSaving`` instead of ``static::saving``
+
+#### onModelDeleting($model)
+You can use ``onModelDeleting`` instead of ``static::creating``
+
+#### onModelRetrieved($model)
+You can use ``onModelRetrieved`` instead of ``static::creating``
+
+#### onModelCreated($model)
+You can use ``onModelCreated`` instead of ``static::created``
+
+#### onModelUpdated($model)
+You can use ``onModelUpdated`` instead of ``static::updated``
+
+#### onModelSaved($model)
+You can use ``onModelSaved`` instead of ``static::saved``
+
+#### onModelDeleted($model)
+You can use ``onModelDeleted`` instead of ``static::deleted``
 
 ## Convention
-- Your `*Filter` class should have methods in `apply*Property` format. Where the `*` will be replaced by the StudlyCase Property names. So, if your field name is `first_name`, then the method name should be `applyFirstNameProperty()`.
-- If you're passing an extra data to the Model's filter scope like `Model::filter($filter, ['id' => 4])`, then the provided array will take precedence over the request's data.
+- Your hooks method should be `onModel*` format. Where the `*` will be replaced by the StudlyCase Hooks names. So, if your hook is `creating`, then the method name should be `onModelCreating()`.
+- If you want to fire event on column change wise then your hook method should be `onModel<PropertyName><Hookname>`. Where the `PropertyName` will be replaced with your column name in StudlyCase and `Hookname` will be also same way. So if your column is `phone_number` and your hook is `updating`, then the method name should be `onModelPhoneNumberUpdating()`.
 
-## Caveat
-If your **request** & **provided array** to the `filter` scope cannot find any suitable method, then it'll return the whole table data as `select * from your_table`. Be aware of this issue.
+## Warning
+Please use hooks proper way other way data will modified in each hook. 
 
 ## Contributing
 Pull requests are welcome. For any changes, please open an issue first to discuss what you would like to change.

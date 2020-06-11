@@ -18,7 +18,9 @@ trait Fireworks
 
         $self = (new self);
 
+        // before event list
         $beforeEvents = ['creating', 'updating', 'saving', 'deleting'];
+        // after event list
         $afterEvents  = ['retrieved', 'created', 'updated', 'saved', 'deleted'];
 
         foreach ($beforeEvents as $event) {

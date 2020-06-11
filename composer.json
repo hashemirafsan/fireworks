@@ -1,6 +1,6 @@
 {
     "name": "hashemi/fireworks",
-    "description": "A simple trait that will help to fire model property wise event on your laravel model. Using laravel model events, to create hooks with changed column and data",
+    "description": "A simple trait that will help to fire property wise event on your laravel model. Using laravel model events, to create hooks.",
     "type": "library",
     "license": "MIT",
     "keywords": [

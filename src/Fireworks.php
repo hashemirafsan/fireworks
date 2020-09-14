@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Hashemi\Fireworks;
 
@@ -12,7 +13,7 @@ use Illuminate\Support\Str;
  */
 trait Fireworks
 {
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
@@ -46,27 +47,27 @@ trait Fireworks
 
     /**
      * @param Model $model
-     * @param $event
+     * @param string $event
      */
-    private function callBeforeEvent(Model $model, $event) : void
+    private function callBeforeEvent(Model $model, string $event): void
     {
         $this->callColumnsEvent($model, ('onModel%s' . Str::studly($event)));
     }
 
     /**
      * @param Model $model
-     * @param $event
+     * @param string $event
      */
-    private function callAfterEvent(Model $model, $event) : void
+    private function callAfterEvent(Model $model, string $event): void
     {
         $this->callColumnsEvent($model, ('onModel%s'.Str::studly($event)));
     }
 
     /**
-     * @param $model
-     * @param $methodConvention
+     * @param Model $model
+     * @param string $methodConvention
      */
-    private function callColumnsEvent(Model $model, string $methodConvention) : void
+    private function callColumnsEvent(Model $model, string $methodConvention): void
     {
         foreach ($model->getDirty() ?? [] as $column => $newValue) {
             $method = sprintf($methodConvention, Str::studly($column));
